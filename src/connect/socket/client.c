@@ -140,6 +140,7 @@ void *Modbus_clientSend_thread(void *arg) // 25
 
 	// unsigned char code_fun[] = {0x03, 0x06, 0x10};
 	// unsigned char errid_fun[] = {0x83, 0x86, 0x90};
+	// sleep(10);
 
 	while (modbus_sockt_state == STATUS_OFF)
 	{
@@ -221,7 +222,6 @@ void *Modbus_clientRecv_thread(void *arg) // 25
 	server_sock.addr = inet_addr(Para_plc.server_ip);
 	server_sock.fd = -1;
 
-	sleep(4);
 loop:
 	while (1)
 	{

@@ -141,7 +141,7 @@ void subscribeFromLcd(void)
 
 	void *handle;
 	char *error;
-#define LIB_LCD_PATH "/usr/lib/libmodtcp.so"
+#define LIB_LCD_PATH "/usr/local/lib/libmodtcp.so"
 	typedef int (*outData2Other)(unsigned char, void *);		   //输出数据
 	typedef int (*in_fun)(unsigned char type, outData2Other pfun); //命令处理函数指针
 	in_fun my_func = NULL;
