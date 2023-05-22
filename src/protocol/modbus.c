@@ -86,6 +86,9 @@ int SendBmsDataToThread(unsigned char order)
 	case BOX_SwitchD2_OFF: //开关柜D2分闸
 		val |= (1<<EMU_PLC_BOX_SwitchD2_OFF);
 		break;
+	case 18: //风机
+		val |= (1<<0);
+		break;
 	default:
 		break;
 	}
