@@ -36,10 +36,13 @@ int AnalysModbus(unsigned char *pdata, int len)
 	{
 		unsigned short data = *(unsigned short *)&emudata[3];
 		int order = 6;
+
+
 		if ((data & (1 << PLC_EMU_DSTART)) != 0)
 			order = 1;
 		else if ((data & (1 << PLC_EMU_STOP)) != 0)
 			order = 2;
+
 
 		if (order > 0)
 			pPara_plc->funOrder(order);
