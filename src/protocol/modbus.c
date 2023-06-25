@@ -75,7 +75,6 @@ int SendBmsDataToThread(unsigned char order)
 		break;
 	case BOX_35kV_OFF: //				  // 35kV进线柜分闸
 		val |= (1<<EMU_PLC_BOX_35kV_OFF);
-
 		break;
 	case BOX_SwitchD1_ON: //开关柜D1合闸
 		val |= (1<<EMU_PLC_BOX_SwitchD1_ON);

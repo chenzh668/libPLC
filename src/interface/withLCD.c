@@ -22,7 +22,7 @@ unsigned short HL_BitConvert(unsigned short sval)
 
 void recvLcdPara(void *para){
 	memcpy((void *)pPara_plc, para, sizeof(PARA_PLC));
-	printf("PLC接收到的 pPara flag_RecvNeed_LCD:%d pPara_plc->lcdnum:%d\n",pPara_plc->flag_RecvNeed_LCD,pPara_plc->lcdnum);
+	printf("plc模块  接收到的配置参数  flag_RecvNeed_LCD:%d pPara_plc->lcdnum:%d\n",pPara_plc->flag_RecvNeed_LCD,pPara_plc->lcdnum);
 	int i,sn=0;
 
 	for (i = 0; i < pPara_plc->lcdnum; i++)
@@ -31,10 +31,10 @@ void recvLcdPara(void *para){
 		if ((pPara_plc->flag_RecvNeed_LCD & (1 << i)) != 0)
 		{
 			flag_RecvNeed_PCS_YC[i] = countRecvFlag(pPara_plc->pcsnum[i]);
-			printf("PLC 处理 flag_RecvNeed_PCS_YC[%d]:%d\n",i,flag_RecvNeed_PCS_YC[i]);
+			// printf("PLC 处理 flag_RecvNeed_PCS_YC[%d]:%d\n",i,flag_RecvNeed_PCS_YC[i]);
 		}
 	}
-	printf("PLC接收到的 pcs总数:%d\n",total_pcsnum);
+	printf("plc模块 接收到的 pcs总数:%d\n",total_pcsnum);
 	
 	for (sn = 0; sn < total_pcsnum; sn++)
 	{
@@ -107,10 +107,11 @@ int recvfromlcd(unsigned char type, void *pdata)
 		aw = (temp_aw % 256) * 256 + temp_aw / 256;
 		temp_tw = temp.pcs_data[Temperature_IGBT];
 		tw = (temp_tw % 256) * 256 + temp_tw / 256;
-		printf("1PLC收到的有功功率 lcdid=%d pcsid=%d pw=%hd %hx\n", temp.lcdid, temp.pcsid, pw, temp_pw);
-		printf("2PLC收到的无功功率 lcdid=%d pcsid=%d qw=%hd %hx\n", temp.lcdid, temp.pcsid, qw, temp_qw);
-		printf("3PLC收到的视在功率 lcdid=%d pcsid=%d aw=%hd %hx \n", temp.lcdid, temp.pcsid, aw, temp_aw);
-		printf("4PLC收到的IGBT温度 lcdid=%d pcsid=%d aw=%hd %hx \n", temp.lcdid, temp.pcsid, tw, temp_tw);
+		printf("plc模块 接收到的遥测  sn:%d \n",sn);
+		printf("plc模块 1PLC收到的有功功率 lcdid=%d pcsid=%d pw=%hd %hx\n", temp.lcdid, temp.pcsid, pw, temp_pw);
+		// printf("2PLC收到的无功功率 lcdid=%d pcsid=%d qw=%hd %hx\n", temp.lcdid, temp.pcsid, qw, temp_qw);
+		// printf("3PLC收到的视在功率 lcdid=%d pcsid=%d aw=%hd %hx \n", temp.lcdid, temp.pcsid, aw, temp_aw);
+		printf("plc模块 4PLC收到的IGBT温度 lcdid=%d pcsid=%d aw=%hd %hx \n", temp.lcdid, temp.pcsid, tw, temp_tw);
 		// sn = temp.lcdid * 6 + temp.pcsid - 1;
 		sn = temp.sn;
 		SendLcdDataToThread(sn + 5, pw);
@@ -126,10 +127,9 @@ int recvfromlcd(unsigned char type, void *pdata)
 		
 
 		if(flag_recv_lcd == pPara_plc->flag_RecvNeed_LCD){
-			printf("PLC遥测的 total_pcsnum：%d\n",total_pcsnum);
 			for(i = 0;i < total_pcsnum;i++){
 				pw_total+=yc_PW[i];
-				printf("plc接收到pcs的遥测数据：%d val:%d \n",i,pw_total);
+				// printf("plc接收到pcs的遥测数据：%d val:%d \n",i,pw_total);
 			}
 			SendLcdDataToThread(52, pw_total);
 		}	
@@ -149,7 +149,7 @@ int recvfromlcd(unsigned char type, void *pdata)
 		int sn,id=0;
 		// sn=temp.lcdid*6+temp.pcsid-1;
 		sn = temp.sn;
-	
+		printf("plc模块 接收到的遥信  sn:%d 变流运行状态1:%d\n",sn,temp.pcs_data[u16_InvRunState1]);
 
 		
 		if(sn>=0 && sn<16)
@@ -167,18 +167,16 @@ int recvfromlcd(unsigned char type, void *pdata)
 			id=2;
 			sn-=32;
 		}
-		printf("plc 接收到的遥信  sn:%d id：%d\n",sn,id);
+		// printf("plc 接收到的遥信  sn:%d id：%d\n",sn,id);
 
 		b = temp.pcs_data[u16_InvRunState1] & (1 << bPcsRunning);
 		
 		if (b > 0)
 		{
-			printf("plc遥信置1 %d %d\n",outdata[id],sn);
-			// setbit(outdata[id], sn);
+			// printf("plc遥信置1 %d %d\n",outdata[id],sn);
 			outdata[id] |= (1 << sn);
 		}else if(b == 0){
-			printf("plc遥信置0 %d %d\n",outdata[id],sn);
-			// clrbit(outdata[id], sn);
+			// printf("plc遥信置0 %d %d\n",outdata[id],sn);
 			outdata[id] &= ~(1 << sn);
 		}
 
@@ -186,42 +184,36 @@ int recvfromlcd(unsigned char type, void *pdata)
 		
 		if (id==0)
 		{
-			printf(" plc 遥信flag_recv_pcs[0]:%d flag_RecvNeed_PCS_YX[0]：%d\n",flag_recv_pcs[id],flag_RecvNeed_PCS_YX[0]);
 			if (flag_recv_pcs[0] == flag_RecvNeed_PCS_YX[0])
 			{
-				printf("PLC遥信outdata[0]:%d\n",outdata[0]);
 				val = HL_BitConvert(outdata[0]);
-				printf("2 val :%x\n",val);
 				regAddr = 2;
 				flag = 1;
 			}
 		}
 		else if (id==1)
 		{
-			printf(" plc 遥信flag_recv_pcs[1]:%d flag_RecvNeed_PCS_YX[1]：%d\n",flag_recv_pcs[1],flag_RecvNeed_PCS_YX[1]);
+			// printf(" plc 遥信flag_recv_pcs[1]:%d flag_RecvNeed_PCS_YX[1]：%d\n",flag_recv_pcs[1],flag_RecvNeed_PCS_YX[1]);
 			if (flag_recv_pcs[1] == flag_RecvNeed_PCS_YX[1])
 			{
-				printf("PLC遥信outdata[1]:%d\n",outdata[1]);
+
 				val = HL_BitConvert(outdata[1]);
-				printf("3 val :%x\n", val);
 				regAddr = 3;
 				flag = 1;
 			}
 		}
 		else if (id==2)
 		{
-			printf(" plc 遥信flag_recv_pcs[2]:%d flag_RecvNeed_PCS_YX[2]:%d\n",flag_recv_pcs[2],flag_RecvNeed_PCS_YX[2]);
+			// printf(" plc 遥信flag_recv_pcs[2]:%d flag_RecvNeed_PCS_YX[2]:%d\n",flag_recv_pcs[2],flag_RecvNeed_PCS_YX[2]);
 			if (flag_recv_pcs[2] == flag_RecvNeed_PCS_YX[2])
 			{
-				printf("PLC遥信outdata[2]:%d\n",outdata[2]);
 				val = HL_BitConvert(outdata[2]);
-				printf("4 val :%x\n", val);
 				regAddr = 4;
 				flag = 1;
 			}
 		}
 		else
-			printf("PLC接收遥信数据出现错误！！\n");
+			printf("plc模块 PLC接收遥信数据出现错误！！\n");
 
 		if (flag == 1){
 			SendLcdDataToThread(regAddr, val);
@@ -350,7 +342,7 @@ void subscribeFromLcd(void)
 		exit(EXIT_FAILURE);
 	}
 
-	printf("PLC模块订阅LCD遥测、遥信数据\n");
+	printf("plc模块 订阅LCD遥测、遥信数据\n");
 	my_func(_YC_, recvfromlcd);
 	my_func(_YX_, recvfromlcd);
 
